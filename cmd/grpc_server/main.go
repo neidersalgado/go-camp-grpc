@@ -26,9 +26,8 @@ func main() {
 	web.SetUpRouter(muxRouter)
 
 	server := &http.Server{
-		Handler: muxRouter,
-		Addr:    conf.Hosts + strconv.Itoa(conf.Port),
-		// Good practice: enforce timeouts for servers you create!
+		Handler:      muxRouter,
+		Addr:         conf.Hosts + strconv.Itoa(conf.Port),
 		WriteTimeout: time.Duration(conf.WriteTimeout) * time.Second,
 		ReadTimeout:  time.Duration(conf.ReadTimeout) * time.Second,
 	}
