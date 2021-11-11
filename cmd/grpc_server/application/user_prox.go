@@ -26,3 +26,18 @@ func (up *UserProx) GetUserByID(userId int) (entities.User, error) {
 	}
 	return entities.User{}, errors.New("Not Implemented")
 }
+
+
+func (up *UserProx) Create(user entities.User) (entities.User, error) {
+	return entities.User{}, errors.New("Not Implemented")
+}
+
+func (up *UserProx) GetAll() ([]entities.User, error) {
+	return  []entities.User, errors.New("Not Implemented")
+}
+func (up *UserProx) Update(user entities.User) error {
+	return  errors.New("Not Implemented")
+}
+func (up *UserProx) Delete(userId int) error {
+	return  errors.New("Not Implemented")
+}
