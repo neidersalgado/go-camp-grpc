@@ -1,25 +1,20 @@
-package web
+package endpoint
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"strconv"
-
-	"github.com/gorilla/mux"
-
-	users "github.com/neidersalgado/go-camp-grpc/cmd/grpc_server/application"
-	"github.com/neidersalgado/go-camp-grpc/cmd/grpc_server/entities"
+	"github.com/neidersalgado/go-camp-grpc/cmd/REST_server/bussiness/usecase"
 )
 
 type UserController struct {
-	dataSource *users.UserProx
+	uc usecase.UserUC
 }
 
-func NewUserController() *UserController {
-	return &UserController{}
+func NewUserController(usecase usecase.UserUC) *UserController {
+	return &UserController{
+		uc: usecase,
+	}
 }
 
+/*
 func (c *UserController) GetByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
@@ -75,7 +70,7 @@ func (c *UserController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseJSON(w, http.StatusCreated, userCreated)
+	responseMessage(w, http.StatusCreated, fmt.Sprint("User With Id:%D Created.", userCreated.Id))
 
 }
 
@@ -108,7 +103,7 @@ func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseJSON(w, http.StatusNoContent, userToUpdate)
+	responseMessage(w, http.StatusNoContent, fmt.Sprintf("User With Id: %d updated correctly.", userToUpdate.Id))
 
 }
 func (c *UserController) Delete(w http.ResponseWriter, r *http.Request) {
@@ -124,7 +119,7 @@ func (c *UserController) Delete(w http.ResponseWriter, r *http.Request) {
 	intId, res := strconv.Atoi(id)
 
 	if res != nil {
-		responserError(w, http.StatusBadRequest, "Invalid  is format")
+		responserError(w, http.StatusBadRequest, "Invalid ID format")
 		return
 	}
 
@@ -135,15 +130,17 @@ func (c *UserController) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseJSON(w, http.StatusNoContent, fmt.Sprintf("Unable to delete User with ID: %v", id))
+	responseMessage(w, http.StatusNoContent, fmt.Sprintf("Deleted user with ID: %v", id))
 }
 
-//TODo edit to response no errors just messages
 func responserError(w http.ResponseWriter, code int, message string) {
 	responseJSON(w, code, map[string]string{"error": message})
 }
 
-//create function response with status
+func responseMessage(w http.ResponseWriter, code int, message string) {
+	responseJSON(w, code, map[string]string{"response": message})
+}
+
 func responseJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
 
@@ -151,3 +148,4 @@ func responseJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.WriteHeader(code)
 	w.Write(response)
 }
+*/

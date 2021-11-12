@@ -10,8 +10,7 @@ import (
 	"github.com/caarlos0/env/v6"
 	"github.com/gorilla/mux"
 
-	"github.com/neidersalgado/go-camp-grpc/cmd/grpc_server/config"
-	"github.com/neidersalgado/go-camp-grpc/cmd/grpc_server/web"
+	"github.com/neidersalgado/go-camp-grpc/cmd/REST_server/config"
 )
 
 func main() {
@@ -23,7 +22,7 @@ func main() {
 
 	muxRouter := mux.NewRouter()
 
-	web.SetUpRouter(muxRouter)
+	web.
 
 	server := &http.Server{
 		Handler:      muxRouter,

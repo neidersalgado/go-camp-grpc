@@ -1,4 +1,4 @@
-package web
+package endpoint
 
 import (
 	"github.com/gorilla/mux"
