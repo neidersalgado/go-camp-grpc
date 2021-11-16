@@ -35,7 +35,7 @@ func (s *DefaultUserService) GetByID(userID string) (entities.User, error) {
 	return user, nil
 }
 
-func (s *DefaultUserService) GetAll() (*[]entities.User, error) {
+func (s *DefaultUserService) GetAll() ([]entities.User, error) {
 	users, err := s.repository.ListUsers()
 	if err != nil {
 		return nil, fmt.Errorf("Couldn't get users.\n Error: %v", err)

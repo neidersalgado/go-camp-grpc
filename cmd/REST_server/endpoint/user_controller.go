@@ -1,6 +1,11 @@
 package endpoint
 
 import (
+	"encoding/json"
+	"net/http"
+
+	"github.com/gorilla/mux"
+
 	"github.com/neidersalgado/go-camp-grpc/cmd/REST_server/bussiness/usecase"
 )
 
@@ -14,20 +19,17 @@ func NewUserController(usecase usecase.UserUC) *UserController {
 	}
 }
 
-/*
 func (c *UserController) GetByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	id, varsOk := vars["id"]
+	userId, varsOk := vars["id"]
 
-	userId, err := strconv.Atoi(id)
-
-	if !varsOk || err != nil {
+	if !varsOk {
 		responserError(w, http.StatusBadRequest, "Invalid Id")
 		return
 	}
 
-	user, err := c.dataSource.GetUserByID(userId)
+	user, err := c.uc.GetByID(userId)
 
 	if err != nil {
 		responserError(w, http.StatusNotFound, err.Error())
@@ -37,6 +39,7 @@ func (c *UserController) GetByID(w http.ResponseWriter, r *http.Request) {
 
 }
 
+/**
 func (c *UserController) GetAll(w http.ResponseWriter, r *http.Request) {
 	resp, err := c.dataSource.GetAll()
 
@@ -132,7 +135,7 @@ func (c *UserController) Delete(w http.ResponseWriter, r *http.Request) {
 
 	responseMessage(w, http.StatusNoContent, fmt.Sprintf("Deleted user with ID: %v", id))
 }
-
+*/
 func responserError(w http.ResponseWriter, code int, message string) {
 	responseJSON(w, code, map[string]string{"error": message})
 }
@@ -148,4 +151,3 @@ func responseJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.WriteHeader(code)
 	w.Write(response)
 }
-*/

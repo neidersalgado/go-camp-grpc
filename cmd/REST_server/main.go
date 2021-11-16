@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/neidersalgado/go-camp-grpc/cmd/REST_server/config"
+	"github.com/neidersalgado/go-camp-grpc/cmd/REST_server/endpoint"
 )
 
 func main() {
@@ -22,7 +23,7 @@ func main() {
 
 	muxRouter := mux.NewRouter()
 
-	web.
+	endpoint.SetUpRouter(muxRouter)
 
 	server := &http.Server{
 		Handler:      muxRouter,
