@@ -1,13 +1,11 @@
 package entities
 
-import "time"
-
 type User struct {
 	Id                    string
 	PwdHash               string
 	EMail                 string
 	Name                  string
-	BirthDate             time.Time
+	Age                   int32
 	AdditionalInformation string
 	Parents               []User
 }

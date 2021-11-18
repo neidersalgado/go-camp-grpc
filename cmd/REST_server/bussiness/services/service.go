@@ -29,7 +29,7 @@ func (s *DefaultUserService) GetByID(userID string) (entities.User, error) {
 	user, err := s.repository.GetUser(userID)
 
 	if err != nil {
-		return entities.User{}, fmt.Errorf("Couldn't Get user with ID: %s \n Error: %v", user.Id, err)
+		return entities.User{}, fmt.Errorf("Couldn't Get user with ID: %s \n Error: %v", userID, err)
 	}
 
 	return user, nil
@@ -37,9 +37,11 @@ func (s *DefaultUserService) GetByID(userID string) (entities.User, error) {
 
 func (s *DefaultUserService) GetAll() ([]entities.User, error) {
 	users, err := s.repository.ListUsers()
+
 	if err != nil {
 		return nil, fmt.Errorf("Couldn't get users.\n Error: %v", err)
 	}
+
 	return users, nil
 }
 
@@ -47,6 +49,7 @@ func (s *DefaultUserService) Update(userToUpdate entities.User) error {
 	if err := s.repository.UpdateUser(userToUpdate); err != nil {
 		return fmt.Errorf("Couldn't update user with ID: %s \n Error: %v", userToUpdate.Id, err)
 	}
+
 	return nil
 }
 
@@ -54,15 +57,17 @@ func (s *DefaultUserService) DeleteUser(userID string) error {
 	if err := s.repository.DeleteUser(userID); err != nil {
 		return fmt.Errorf("Couldn't delete the user with ID: %s \n Error: %v", userID, err)
 	}
+
 	return nil
 }
 
 func (s *DefaultUserService) BulkCreate(users *[]entities.User) error {
 	for _, user := range *users {
 		if err := s.repository.CreateUser(user); err != nil {
-			return fmt.Errorf("Couldn't update user with ID: %s \n Error: %v", user.Id, err)
+			return fmt.Errorf("Couldn't create user with ID: %s \n Error: %v", user.Id, err)
 		}
 	}
+
 	return nil
 }
 
