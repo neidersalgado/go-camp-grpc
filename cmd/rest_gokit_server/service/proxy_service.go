@@ -39,9 +39,10 @@ func (up UserProxy) CreateUser(u models.User) error {
 	}
 
 	result, errorFromCall := c.Create(serverCon.context, externalUser)
-
-	if result.Code != service.Response_OK {
-		return errors.New("Error Creating User")
+	fmt.Print(result.Code)
+	var responseOk service.Response_CodeResult = 200
+	if result.Code != responseOk {
+		return errors.New(fmt.Sprintf("Error Creating User  error: %v, response code: %v", errorFromCall, result.Code))
 	}
 
 	return errorFromCall

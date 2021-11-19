@@ -34,13 +34,13 @@ const (
 var (
 	Response_CodeResult_name = map[int32]string{
 		0: "UNKNOW",
-		1: "OK",
+		1: "200",
 		2: "FAILED",
 		3: "INVALIDINPUT",
 	}
 	Response_CodeResult_value = map[string]int32{
 		"UNKNOW":       0,
-		"OK":           1,
+		"200":          1,
 		"FAILED":       2,
 		"INVALIDINPUT": 3,
 	}
