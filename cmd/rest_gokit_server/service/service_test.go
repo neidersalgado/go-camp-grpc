@@ -8,9 +8,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/neidersalgado/go-camp-grpc/cmd/REST_server/bussiness/entities"
-	"github.com/neidersalgado/go-camp-grpc/cmd/REST_server/bussiness/repository/mocks"
-	service "github.com/neidersalgado/go-camp-grpc/cmd/REST_server/bussiness/services"
+	"github.com/neidersalgado/go-camp-grpc/cmd/rest_gokit_server/models"
+	"github.com/neidersalgado/go-camp-grpc/cmd/rest_gokit_server/repository/mocks"
+	"github.com/neidersalgado/go-camp-grpc/cmd/rest_gokit_server/service"
 )
 
 func Test_NewServiceFunction(t *testing.T) {
@@ -67,7 +67,7 @@ func Test_GetByID_WhenGetNotOk_ThenReturnNilUserAndError(t *testing.T) {
 	userID := "1234"
 	repoError := errors.New("Not Implemented")
 	expectedError := fmt.Errorf("Couldn't Get user with ID: %s \n Error: %v", userID, repoError)
-	repoMock.On("GetUser", userID).Return(entities.User{}, repoError).Once()
+	repoMock.On("GetUser", userID).Return(models.User{}, repoError).Once()
 	userService := service.NewUserService(repoMock)
 	ctx := context.TODO()
 
@@ -199,18 +199,17 @@ func Test_BulkCreate_WhenBulkNotOk_ThenReturnError(t *testing.T) {
 	repoMock.AssertExpectations(t)
 }
 
-func getUser() entities.User {
-	return entities.User{
+func getUser() models.User {
+	return models.User{
 		Id:                    "1234",
-		EMail:                 "fake@fake.com",
 		Name:                  "fakeName",
 		AdditionalInformation: "none",
-		Parents:               []entities.User{},
+		Parents:               []models.User{},
 	}
 }
 
-func getUsers() []entities.User {
-	return []entities.User{
+func getUsers() []models.User {
+	return []models.User{
 		getUser(),
 		getUser(),
 		getUser(),

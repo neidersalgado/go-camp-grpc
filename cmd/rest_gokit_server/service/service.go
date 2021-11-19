@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/neidersalgado/go-camp-grpc/cmd/REST_server/bussiness/entities"
-	"github.com/neidersalgado/go-camp-grpc/cmd/REST_server/bussiness/repository"
+	"github.com/neidersalgado/go-camp-grpc/cmd/rest_gokit_server/models"
+	"github.com/neidersalgado/go-camp-grpc/cmd/rest_gokit_server/repository"
 )
 
 type DefaultUserService struct {
@@ -18,7 +18,7 @@ func NewUserService(repo repository.Repository) *DefaultUserService {
 	}
 }
 
-func (s *DefaultUserService) Create(ctx context.Context, user entities.User) error {
+func (s *DefaultUserService) Create(ctx context.Context, user models.User) error {
 	if err := s.repository.CreateUser(user); err != nil {
 		return fmt.Errorf("Can't create user with ID: %s \n Error: %v", user.Id, err)
 	}
@@ -26,17 +26,17 @@ func (s *DefaultUserService) Create(ctx context.Context, user entities.User) err
 	return nil
 }
 
-func (s *DefaultUserService) GetByID(ctx context.Context, userID string) (entities.User, error) {
+func (s *DefaultUserService) GetByID(ctx context.Context, userID string) (models.User, error) {
 	user, err := s.repository.GetUser(userID)
 
 	if err != nil {
-		return entities.User{}, fmt.Errorf("Couldn't Get user with ID: %s \n Error: %v", userID, err)
+		return models.User{}, fmt.Errorf("Couldn't Get user with ID: %s \n Error: %v", userID, err)
 	}
 
 	return user, nil
 }
 
-func (s *DefaultUserService) GetAll(ctx context.Context) ([]entities.User, error) {
+func (s *DefaultUserService) GetAll(ctx context.Context) ([]models.User, error) {
 	users, err := s.repository.ListUsers()
 
 	if err != nil {
@@ -46,7 +46,7 @@ func (s *DefaultUserService) GetAll(ctx context.Context) ([]entities.User, error
 	return users, nil
 }
 
-func (s *DefaultUserService) Update(ctx context.Context, userToUpdate entities.User) error {
+func (s *DefaultUserService) Update(ctx context.Context, userToUpdate models.User) error {
 	if err := s.repository.UpdateUser(userToUpdate); err != nil {
 		return fmt.Errorf("Couldn't update user with ID: %s \n Error: %v", userToUpdate.Id, err)
 	}
@@ -62,7 +62,7 @@ func (s *DefaultUserService) DeleteUser(ctx context.Context, userID string) erro
 	return nil
 }
 
-func (s *DefaultUserService) BulkCreate(ctx context.Context, users *[]entities.User) error {
+func (s *DefaultUserService) BulkCreate(ctx context.Context, users *[]models.User) error {
 	for _, user := range *users {
 		if err := s.repository.CreateUser(user); err != nil {
 			return fmt.Errorf("Couldn't create user with ID: %s \n Error: %v", user.Id, err)
@@ -72,7 +72,7 @@ func (s *DefaultUserService) BulkCreate(ctx context.Context, users *[]entities.U
 	return nil
 }
 
-func (s *DefaultUserService) SetParents(ctx context.Context, userId string, parents *[]entities.User) error {
+func (s *DefaultUserService) SetParents(ctx context.Context, userId string, parents *[]models.User) error {
 	user, err := s.GetByID(ctx, userId)
 
 	if err != nil {

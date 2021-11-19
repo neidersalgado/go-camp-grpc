@@ -1,4 +1,4 @@
-package transport
+package service
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/neidersalgado/go-camp-grpc/cmd/REST_server/bussiness/entities"
-	"github.com/neidersalgado/go-camp-grpc/cmd/REST_server/pb"
+	"github.com/neidersalgado/go-camp-grpc/cmd/rest_gokit_server/models"
+	service "github.com/neidersalgado/go-camp-grpc/cmd/rest_gokit_server/service/pb"
 )
 
 type UserProxy struct {
@@ -20,9 +20,9 @@ func NewUserProxy() *UserProxy {
 	return &UserProxy{}
 }
 
-func (up UserProxy) Create(u entities.User) (entities.User, error) {
+func (up UserProxy) CreateUser(u models.User) error {
 
-	serverCon, err := OpenServerConection()
+	serverCon, err := OpenServerConnection()
 
 	if err != nil {
 		log.Fatalf("did not connect to server: %s", err)
@@ -30,8 +30,8 @@ func (up UserProxy) Create(u entities.User) (entities.User, error) {
 
 	defer serverCon.dispose()
 	c := serverCon.client
-	externalUser := &pb.UserRequest{
-		Id:                    "",
+	externalUser := &service.UserRequest{
+		Id:                    u.Id,
 		Name:                  u.Name,
 		PwdHash:               u.PwdHash,
 		AdditionalInformation: u.AdditionalInformation,
@@ -40,16 +40,16 @@ func (up UserProxy) Create(u entities.User) (entities.User, error) {
 
 	result, errorFromCall := c.Create(serverCon.context, externalUser)
 
-	if result.Code != pb.Response_OK {
-		return entities.User{}, errors.New("error al crear")
+	if result.Code != service.Response_OK {
+		return errors.New("Error Creating User")
 	}
 
-	return u, errorFromCall
+	return errorFromCall
 }
 
-func (up UserProxy) Delete(id string) (bool, error) {
+func (up UserProxy) DeleteUser(userID string) error {
 
-	serverCon, err := OpenServerConection()
+	serverCon, err := OpenServerConnection()
 
 	if err != nil {
 		log.Fatalf("did not connect to server: %s", err)
@@ -57,21 +57,21 @@ func (up UserProxy) Delete(id string) (bool, error) {
 
 	defer serverCon.dispose()
 	c := serverCon.client
-	externalUserId := &pb.UserID{
-		ID: id,
+	externalUserId := &service.UserID{
+		ID: userID,
 	}
 	result, errorFromCall := c.Delete(serverCon.context, externalUserId)
 
-	if result.Code == pb.Response_OK {
-		return true, nil
+	if result.Code == service.Response_OK {
+		return nil
 	}
 
-	return false, errorFromCall
+	return errorFromCall
 }
 
-func (up UserProxy) GetById(userID string) (entities.User, error) {
+func (up UserProxy) GetUser(userID string) (models.User, error) {
 
-	serverCon, err := OpenServerConection()
+	serverCon, err := OpenServerConnection()
 
 	if err != nil {
 		log.Fatalf("did not connect to server: %s", err)
@@ -79,17 +79,17 @@ func (up UserProxy) GetById(userID string) (entities.User, error) {
 
 	defer serverCon.dispose()
 	c := serverCon.client
-	externalUserId := &pb.UserID{
+	externalUserId := &service.UserID{
 		ID: userID,
 	}
 	userFromGrpc, errorFromCall := c.Get(serverCon.context, externalUserId)
 
 	if errorFromCall != nil {
 		fmt.Println("server call did not work:", errorFromCall)
-		return entities.User{}, errorFromCall
+		return models.User{}, errorFromCall
 	}
 
-	response := entities.User{
+	response := models.User{
 		Id:                    userFromGrpc.Id,
 		Name:                  userFromGrpc.Name,
 		PwdHash:               userFromGrpc.PwdHash,
@@ -99,7 +99,14 @@ func (up UserProxy) GetById(userID string) (entities.User, error) {
 	return response, errorFromCall
 }
 
-func OpenServerConection() (*ServerConnection, error) {
+func (up UserProxy) ListUsers() ([]models.User, error) {
+	return []models.User{}, fmt.Errorf("List Users Not Implemented")
+}
+func (up UserProxy) UpdateUser(user models.User) error {
+	return fmt.Errorf("UpdateUser Not Implemented")
+}
+
+func OpenServerConnection() (*ServerConnection, error) {
 
 	conn, err := grpc.Dial(":9000", grpc.WithInsecure())
 
@@ -110,7 +117,7 @@ func OpenServerConection() (*ServerConnection, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
-	c := pb.NewUsersClient(conn)
+	c := service.NewUsersClient(conn)
 
 	return &ServerConnection{client: c, context: ctx, dispose: func() {
 		cancel()
@@ -121,7 +128,7 @@ func OpenServerConection() (*ServerConnection, error) {
 }
 
 type ServerConnection struct {
-	client  pb.UsersClient
+	client  service.UsersClient
 	context context.Context
 	dispose func()
 }
