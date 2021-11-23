@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
@@ -84,8 +85,9 @@ func (s DefaultUserService) GetAllUsers(ctx context.Context) ([]entities.User, e
 	users, err := s.repository.List()
 
 	if err != nil {
+		fmt.Print(err)
 		level.Error(logger).Log("err from repo is", err)
-		return []entities.User{}, err
+		return users, err
 	}
 
 	return users, nil

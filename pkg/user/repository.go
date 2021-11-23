@@ -48,9 +48,11 @@ func (up ProxyRepository) Get(userID int32) (entities.User, error) {
 }
 
 func (up ProxyRepository) List() ([]entities.User, error) {
-	return []entities.User{}, fmt.Errorf("List Users Not Implemented")
+	return []entities.User{}, nil
+	//[]entities.User{}, fmt.Errorf("List Users Not Implemented")
 }
 
 func (up ProxyRepository) Delete(userID int32) error {
-	return fmt.Errorf("Delete Users Not Implemented")
+	return nil
+	//fmt.Errorf("Delete Users Not Implemented")
 }

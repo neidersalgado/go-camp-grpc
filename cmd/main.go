@@ -35,8 +35,13 @@ func main() {
 func SetUpRouter(router *mux.Router) {
 	repository := user.NewProxyRepository()
 	service := user.NewDefaultUserService(repository)
-	usersController := user.NewUserHandler(service)
-	router.HandleFunc("/users", usersController.Create).Methods("POST")
+	userHandler := user.NewUserHandler(service)
+	router.HandleFunc("/users", userHandler.Create).Methods("POST")
+	router.HandleFunc("/users/{id}", userHandler.Get).Methods("GET")
+	router.HandleFunc("/users", userHandler.GetAll).Methods("GET")
+	router.HandleFunc("/users/{id}", userHandler.Update).Methods("PUT")
+	router.HandleFunc("/users/{id}", userHandler.DeleteUser).Methods("DELETE")
+	router.HandleFunc("/users/{id}", userHandler.SetUserParents).Methods("PUT")
 }
 
 type Config struct {
