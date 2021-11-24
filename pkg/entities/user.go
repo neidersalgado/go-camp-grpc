@@ -5,7 +5,7 @@ type User struct {
 	pwdHash               string
 	Email                 string
 	Name                  string
-	Age                   string
+	Age                   int32
 	AdditionalInformation string
 	Parent                []User
 }

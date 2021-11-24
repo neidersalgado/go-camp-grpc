@@ -1,12 +1,16 @@
 package user
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
+
+	"github.com/neidersalgado/go-camp-grpc/pkg/user/pb"
 )
 
 type UserHandler struct {
@@ -18,11 +22,14 @@ func NewUserHandler(service UserService) *UserHandler {
 }
 
 func (c *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
-	userRequest := UserRequest{}
+	logger := log.Default()
+	logger.Output(0, fmt.Sprintf("Creating User Handler"))
+	userRequest := pb.UserRequest{}
 	ctx := r.Context()
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&userRequest); err != nil {
+		logger.Output(0, fmt.Sprintf("Decode Fails"))
 		responseError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
@@ -32,6 +39,7 @@ func (c *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	err := c.service.CreateUser(ctx, userEntity)
 
 	if err != nil {
+		logger.Output(0, fmt.Sprintf("Error  User Handler Call Service err: %v", err.Error()))
 		responseError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -45,7 +53,7 @@ func (c *UserHandler) Authenticate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
-	userRequest := UserRequest{}
+	userRequest := pb.UserRequest{}
 	ctx := r.Context()
 	decoder := json.NewDecoder(r.Body)
 
@@ -64,12 +72,12 @@ func (c *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseJSON(w, http.StatusNoContent, fmt.Sprintf("Updated User with ID: %v", userRequest.UserID))
+	responseJSON(w, http.StatusNoContent, fmt.Sprintf("Updated User with ID: %v", userRequest.UserId))
 }
 
 func (c *UserHandler) Get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	ctx := r.Context()
+	ctx := context.Background()
 	id, varsOk := vars["id"]
 
 	if !varsOk {
@@ -136,7 +144,7 @@ func (c *UserHandler) SetUserParents(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ctx := r.Context()
 	id, varsOk := vars["id"]
-	userRequest := UserRequest{}
+	userRequest := pb.UserRequest{}
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&userRequest); err != nil {

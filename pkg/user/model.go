@@ -5,7 +5,7 @@ type UserModel struct {
 	PWDHash               string
 	Email                 string
 	Name                  string
-	Age                   string
+	Age                   int32
 	AdditionalInformation string
 	Parent                []UserModel
 }

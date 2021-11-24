@@ -25,7 +25,7 @@ type Repository interface {
 	Authenticate(email string, hash string) (bool, error)
 	Create(user entities.User) error
 	Update(user entities.User) error
-	Get(userID int32) (entities.User, error)
+	Get(ctx context.Context, userID int32) (entities.User, error)
 	List() ([]entities.User, error)
 	Delete(userID int32) error
 }
@@ -49,7 +49,9 @@ func (s DefaultUserService) CreateUser(ctx context.Context, user entities.User) 
 	logger := log.With(s.logger, "method", "Create")
 
 	if err := s.repository.Create(user); err != nil {
-		level.Error(logger).Log("err from repo is", err)
+		fmt.Println("*************ERROR ************")
+		fmt.Println("Error occur wile creating %v", err.Error())
+		level.Error(logger).Log("Error from repo is %v", err.Error())
 		return err
 	}
 
@@ -70,10 +72,10 @@ func (s DefaultUserService) UpdateUser(ctx context.Context, user entities.User) 
 
 func (s DefaultUserService) GetUser(ctx context.Context, userID int32) (entities.User, error) {
 	logger := log.With(s.logger, "method", "GetUserByID")
-	user, err := s.repository.Get(userID)
+	user, err := s.repository.Get(ctx, userID)
 
 	if err != nil {
-		level.Error(logger).Log("err from repo is", err)
+		level.Error(logger).Log("err from repo is", err.Error())
 		return entities.User{}, err
 	}
 
@@ -121,7 +123,7 @@ func (s DefaultUserService) BulkCreateUser(ctx context.Context, users []entities
 }
 func (s DefaultUserService) SetUserParents(ctx context.Context, userID int32, parents []entities.User) error {
 	logger := log.With(s.logger, "method", "SetUserParents")
-	user, err := s.repository.Get(userID)
+	user, err := s.repository.Get(ctx, userID)
 
 	if err != nil {
 		level.Error(logger).Log("err from repo is", err)
