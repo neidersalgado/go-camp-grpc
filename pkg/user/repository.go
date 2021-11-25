@@ -38,8 +38,7 @@ func (up ProxyRepository) Create(user entities.User) error {
 	externalUser := transformUserEntityToRequest(user)
 	result, errorFromCall := c.Create(serverCon.context, &externalUser)
 	if errorFromCall != nil {
-		fmt.Sprint(fmt.Sprintf("\n Error Creating User  error: %v \n", errorFromCall.Error()))
-		return errors.New(fmt.Sprintf("Error Creating User  error: %v", errorFromCall))
+		return errors.New(fmt.Sprintf("Error Creating User  error: %v", errorFromCall.Error()))
 	}
 
 	if result.GetCode() != http.StatusOK {
@@ -55,8 +54,8 @@ func (up ProxyRepository) Update(user entities.User) error {
 	return nil
 }
 
-func (up ProxyRepository) Get(ctx context.Context, userID int32) (entities.User, error) {
-
+func (up ProxyRepository) Get(ctx context.Context, userID string) (entities.User, error) {
+	fmt.Printf("repository.Get with id: %v.\n", userID)
 	serverCon, err := OpenServerConnection()
 
 	if err != nil {
@@ -66,10 +65,10 @@ func (up ProxyRepository) Get(ctx context.Context, userID int32) (entities.User,
 	defer serverCon.dispose()
 	c := serverCon.client
 	userIDpb := transformUserIdToUserIdRequest(userID)
+	fmt.Printf("repository.Getcasting user to  call grpc service \n")
 	userResponse, errorFromCall := c.Get(ctx, userIDpb)
-
+	fmt.Printf("service. GEt user sesponse :%v \n", userResponse)
 	if errorFromCall != nil {
-		fmt.Sprint(fmt.Sprintf("\n Error Creating User  error: %v \n", errorFromCall.Error()))
 		return entities.User{}, errors.New(fmt.Sprintf("Error Creating User  error: %v", errorFromCall.Error()))
 	}
 
@@ -78,14 +77,43 @@ func (up ProxyRepository) Get(ctx context.Context, userID int32) (entities.User,
 	return userEntity, nil
 }
 
-func (up ProxyRepository) List() ([]entities.User, error) {
-	return []entities.User{}, nil
-	//[]entities.User{}, fmt.Errorf("List Users Not Implemented")
+func (up ProxyRepository) List(ctx context.Context) ([]entities.User, error) {
+	fmt.Printf("repository.List \n")
+	serverCon, err := OpenServerConnection()
+
+	if err != nil {
+		log.Fatalf("did not connect to server: %s", err)
+	}
+	void := pb.Void{}
+	defer serverCon.dispose()
+	c := serverCon.client
+	usersResponse, errorFromCall := c.GetAll(ctx, &void)
+	fmt.Printf("service.repo.list")
+	if errorFromCall != nil {
+		return []entities.User{}, errors.New(fmt.Sprintf("Error Creating User  error: %v", errorFromCall.Error()))
+	}
+	userEntities := transformUserResponsesToEntities(usersResponse.Users)
+	return userEntities, nil
 }
 
-func (up ProxyRepository) Delete(userID int32) error {
+func (up ProxyRepository) Delete(ctx context.Context, userID string) error {
+	fmt.Printf("repository.Delete user user id: %v \n", userID)
+	serverCon, err := OpenServerConnection()
+
+	if err != nil {
+		log.Fatalf("did not connect to server: %s", err)
+	}
+
+	defer serverCon.dispose()
+	c := serverCon.client
+	deleteRequest := transformUserIdToUserIdRequest(userID)
+	response, errorFromCall := c.Delete(ctx, deleteRequest)
+	fmt.Printf("service.repo.Delete")
+
+	if errorFromCall != nil {
+		return errors.New(fmt.Sprintf("Error Creating User  error: %v, Response:%v\n", errorFromCall.Error(), response))
+	}
 	return nil
-	//fmt.Errorf("Delete Users Not Implemented")
 }
 
 func OpenServerConnection() (*ServerConnection, error) {

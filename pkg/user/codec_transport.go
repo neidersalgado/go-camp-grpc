@@ -31,8 +31,8 @@ func transformUserEntitiesToRequests(userEntities []entities.User) []*pb.UserReq
 	return parentsRequest
 }
 
-func transformUserIdToUserIdRequest(id int32) *pb.UserID {
-	return &pb.UserID{ID: int32(id)}
+func transformUserIdToUserIdRequest(id string) *pb.UserIDRequest {
+	return &pb.UserIDRequest{Email: id}
 }
 
 func transformUserRequestToEntity(userRequest pb.UserRequest) entities.User {
@@ -77,12 +77,12 @@ func transformUserResponsesToEntities(userResponses []*pb.UserResponse) []entiti
 		return []entities.User{}
 	}
 
-	parentsEntities := make([]entities.User, len(userResponses))
+	entities := make([]entities.User, len(userResponses))
 
-	for _, entity := range userResponses {
+	for index, entity := range userResponses {
 		parent := transformUserResponseToEntity(*entity)
-		parentsEntities = append(parentsEntities, parent)
+		entities[index] = parent
 	}
 
-	return parentsEntities
+	return entities
 }
