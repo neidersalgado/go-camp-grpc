@@ -84,7 +84,7 @@ func (c *UserHandler) Get(w http.ResponseWriter, r *http.Request) {
 		responseError(w, http.StatusBadRequest, "Invalid Id")
 		return
 	}
-	fmt.Printf("Get User from service With ID: %v.  Endpoint \n", userID)
+	fmt.Printf("Get User from With ID: %v.  Endpoint \n", userID)
 	user, err := c.service.GetUser(ctx, userID)
 	fmt.Printf("User from service: %v.  Endpoint \n ", user)
 	if err != nil {
