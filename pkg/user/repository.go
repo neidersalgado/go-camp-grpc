@@ -48,9 +48,23 @@ func (up ProxyRepository) Create(user entities.User) error {
 	return nil
 }
 
-func (up ProxyRepository) Update(user entities.User) error {
-	fmt.Println("User well Updated, mock")
-	fmt.Println(fmt.Sprintf("user: %v", user))
+func (up ProxyRepository) Update(ctx context.Context, user entities.User) error {
+	fmt.Printf("repository.Update user user id: %v \n", user.UserID)
+	serverCon, err := OpenServerConnection()
+
+	if err != nil {
+		log.Fatalf("did not connect to server: %s", err)
+	}
+
+	defer serverCon.dispose()
+	c := serverCon.client
+	updateRequest := transformUserEntityToRequest(user)
+	response, errorFromCall := c.Update(ctx, &updateRequest)
+	fmt.Printf("service.repo.Update")
+
+	if errorFromCall != nil {
+		return errors.New(fmt.Sprintf("Error Creating User  error: %v, Response:%v\n", errorFromCall.Error(), response))
+	}
 	return nil
 }
 

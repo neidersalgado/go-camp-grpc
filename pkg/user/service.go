@@ -24,7 +24,7 @@ type UserService interface {
 type Repository interface {
 	Authenticate(email string, hash string) (bool, error)
 	Create(user entities.User) error
-	Update(user entities.User) error
+	Update(ctx context.Context, user entities.User) error
 	Get(ctx context.Context, userID string) (entities.User, error)
 	List(ctx context.Context) ([]entities.User, error)
 	Delete(ctx context.Context, userID string) error
@@ -58,11 +58,11 @@ func (s DefaultUserService) CreateUser(ctx context.Context, user entities.User) 
 }
 
 func (s DefaultUserService) UpdateUser(ctx context.Context, user entities.User) error {
-	logger := log.With(s.logger, "method", "UpdateUSer")
-	err := s.repository.Update(user)
+
+	err := s.repository.Update(ctx, user)
 
 	if err != nil {
-		level.Error(logger).Log("err from repo is", err)
+		fmt.Printf("error updating user email : %+v\n Error: %+v\n", user.Email, err.Error())
 		return err
 	}
 
@@ -134,7 +134,7 @@ func (s DefaultUserService) SetUserParents(ctx context.Context, userID string, p
 	}
 
 	user.Parent = append(user.Parent, parents...)
-	err = s.repository.Update(user)
+	err = s.repository.Update(ctx, user)
 
 	if err != nil {
 		level.Error(logger).Log("err from repo is", err)
