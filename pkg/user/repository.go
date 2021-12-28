@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
+	"github.com/go-kit/kit/log"
 	"google.golang.org/grpc"
 
 	"github.com/neidersalgado/go-camp-grpc/pkg/entities"
@@ -15,10 +15,13 @@ import (
 )
 
 type ProxyRepository struct {
+	logger log.Logger
 }
 
-func NewProxyRepository() *ProxyRepository {
-	return &ProxyRepository{}
+func NewProxyRepository(log log.Logger) *ProxyRepository {
+	return &ProxyRepository{
+		logger: log,
+	}
 }
 
 func (up ProxyRepository) Authenticate(email string, hash string) (bool, error) {
@@ -30,7 +33,7 @@ func (up ProxyRepository) Create(user entities.User) error {
 	serverCon, err := OpenServerConnection()
 
 	if err != nil {
-		log.Fatalf("did not connect to server: %s", err)
+		up.logger.Log("proxy", fmt.Sprintf("did not connect to server: %s", err))
 	}
 
 	defer serverCon.dispose()
@@ -53,7 +56,7 @@ func (up ProxyRepository) Update(ctx context.Context, user entities.User) error 
 	serverCon, err := OpenServerConnection()
 
 	if err != nil {
-		log.Fatalf("did not connect to server: %s", err)
+		up.logger.Log("proxy", fmt.Sprintf("did not connect to server: %s", err))
 	}
 
 	defer serverCon.dispose()
@@ -63,7 +66,7 @@ func (up ProxyRepository) Update(ctx context.Context, user entities.User) error 
 	fmt.Printf("service.repo.Update")
 
 	if errorFromCall != nil {
-		return errors.New(fmt.Sprintf("Error Creating User  error: %v, Response:%v\n", errorFromCall.Error(), response))
+		return errors.New(fmt.Sprintf("Error Updating User  error: %v, Response:%v\n", errorFromCall.Error(), response))
 	}
 	return nil
 }
@@ -73,7 +76,7 @@ func (up ProxyRepository) Get(ctx context.Context, userID string) (entities.User
 	serverCon, err := OpenServerConnection()
 
 	if err != nil {
-		log.Fatalf("did not connect to server: %s", err)
+		up.logger.Log("proxy", fmt.Sprintf("did not connect to server: %s", err))
 	}
 
 	defer serverCon.dispose()
@@ -96,7 +99,7 @@ func (up ProxyRepository) List(ctx context.Context) ([]entities.User, error) {
 	serverCon, err := OpenServerConnection()
 
 	if err != nil {
-		log.Fatalf("did not connect to server: %s", err)
+		up.logger.Log("proxy", fmt.Sprintf("did not connect to server: %s", err))
 	}
 	void := pb.Void{}
 	defer serverCon.dispose()
@@ -104,7 +107,7 @@ func (up ProxyRepository) List(ctx context.Context) ([]entities.User, error) {
 	usersResponse, errorFromCall := c.GetAll(ctx, &void)
 	fmt.Printf("service.repo.list")
 	if errorFromCall != nil {
-		return []entities.User{}, errors.New(fmt.Sprintf("Error Creating User  error: %v", errorFromCall.Error()))
+		return []entities.User{}, errors.New(fmt.Sprintf("Error list Users error: %v", errorFromCall.Error()))
 	}
 	userEntities := transformUserResponsesToEntities(usersResponse.Users)
 	return userEntities, nil
@@ -115,7 +118,7 @@ func (up ProxyRepository) Delete(ctx context.Context, userID string) error {
 	serverCon, err := OpenServerConnection()
 
 	if err != nil {
-		log.Fatalf("did not connect to server: %s", err)
+		up.logger.Log("proxy", fmt.Sprintf("did not connect to server: %s", err))
 	}
 
 	defer serverCon.dispose()
@@ -125,7 +128,7 @@ func (up ProxyRepository) Delete(ctx context.Context, userID string) error {
 	fmt.Printf("service.repo.Delete")
 
 	if errorFromCall != nil {
-		return errors.New(fmt.Sprintf("Error Creating User  error: %v, Response:%v\n", errorFromCall.Error(), response))
+		return errors.New(fmt.Sprintf("Error deleting User  error: %v, Response:%v\n", errorFromCall.Error(), response))
 	}
 	return nil
 }
@@ -135,7 +138,6 @@ func OpenServerConnection() (*ServerConnection, error) {
 	conn, err := grpc.Dial(":9000", grpc.WithInsecure())
 
 	if err != nil {
-		log.Fatalf("did not connect to server: %s", err)
 		return nil, err //unreached?
 	}
 

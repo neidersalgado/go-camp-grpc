@@ -1,47 +1,55 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"log"
 	"net/http"
-	"strconv"
-	"time"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/caarlos0/env/v6"
-	"github.com/gorilla/mux"
+	"github.com/go-kit/log"
 
 	"github.com/neidersalgado/go-camp-grpc/pkg/user"
 )
 
 func main() {
 	conf := Config{}
+
 	if err := env.Parse(&conf); err != nil {
 		fmt.Printf("%+v\n", err)
 	}
 
-	muxRouter := mux.NewRouter()
-
-	SetUpRouter(muxRouter)
-
-	server := &http.Server{
-		Handler:      muxRouter,
-		Addr:         conf.Hosts + strconv.Itoa(conf.Port),
-		WriteTimeout: time.Duration(conf.WriteTimeout) * time.Second,
-		ReadTimeout:  time.Duration(conf.ReadTimeout) * time.Second,
+	var (
+		httpAddr = flag.String("http.addr", ":8080", "HTTP listen address")
+	)
+	flag.Parse()
+	var logger log.Logger
+	{
+		logger = log.NewLogfmtLogger(os.Stderr)
+		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
-	log.Fatal(server.ListenAndServe())
-}
+	proxy := user.NewProxyRepository(logger)
+	var handler http.Handler
+	{
+		handler = user.MakeHTTPHandler(*proxy, log.With(logger, "component", "HTTP"))
+	}
 
-func SetUpRouter(router *mux.Router) {
-	repository := user.NewProxyRepository()
-	service := user.NewDefaultUserService(repository)
-	userHandler := user.NewUserHandler(service)
-	router.HandleFunc("/users", userHandler.Create).Methods("POST")
-	router.HandleFunc("/users/{id}", userHandler.Get).Methods("GET")
-	router.HandleFunc("/users", userHandler.GetAll).Methods("GET")
-	router.HandleFunc("/users/{id}", userHandler.Update).Methods("PUT")
-	router.HandleFunc("/users/{id}", userHandler.DeleteUser).Methods("DELETE")
-	router.HandleFunc("/users/{id}", userHandler.SetUserParents).Methods("PUT")
+	errs := make(chan error)
+	go func() {
+		c := make(chan os.Signal)
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+		errs <- fmt.Errorf("%s", <-c)
+	}()
+
+	go func() {
+		logger.Log("transport", "HTTP", "addr", *httpAddr)
+		errs <- http.ListenAndServe(*httpAddr, handler)
+	}()
+
+	logger.Log("exit", <-errs)
 }
 
 type Config struct {
