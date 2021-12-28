@@ -1,0 +1,72 @@
+@startuml
+
+class UserHandler{  
+    service UserService
+}
+
+
+class DefaultUserService{
+    repository Repository
+}
+
+interface Service {
+    AuthenticateUser(ctx context.Context, email string, hash string) (bool, error)
+	CreateUser(ctx context.Context, user entities.User) error
+	UpdateUser(ctx context.Context, user entities.User) error
+	GetUser(ctx context.Context, userID string) (entities.User, error)
+	GetAllUsers(ctx context.Context) ([]entities.User, error)
+	DeleteUser(ctx context.Context, userID string) error
+	BulkCreateUser(ctx context.Context, users []entities.User) error
+	SetUserParents(ctx context.Context, userID string, parents []entities.User) error
+}
+
+class ProxyRepository{
+}
+
+interface Repository {
+    Authenticate(email string, hash string) (bool, error)
+	Create(user entities.User) error
+	Update(user entities.User) error
+	Get(ctx context.Context, userID string) (entities.User, error)
+	List(ctx context.Context) ([]entities.User, error)
+	Delete(ctx context.Context, userID string) error
+}
+
+entity user{
+    UserID         :       int32
+	PWDHash        :       string
+	Email           :      string
+	Name             :     string
+	Age                   int32
+	AdditionalInformation : string
+	Parent               : []UserModel
+}
+
+class user_grpc{
+    Authenticate(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*Response, error)
+	Create(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Response, error)
+	Get(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	Update(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Response, error)
+	Delete(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*Response, error)
+	GetAll(ctx context.Context, in *Void, opts ...grpc.CallOption) (*UserColletionResponse, error)
+}
+
+entity user_pb{
+    UserID                int32
+	PWDHash               string
+	Email                 string
+	Name                  string
+	Age                   int32
+	AdditionalInformation string
+	Parent                []UserModel
+}
+
+UserHandler *-- user_pb
+UserHandler o-- Service
+DefaultUserService <|--- Service
+DefaultUserService o-- Repository
+ProxyRepository <|--- Repository
+ProxyRepository *-- user_grpc
+ProxyRepository *-- user
+
+
